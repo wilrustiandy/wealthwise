@@ -8,18 +8,19 @@
         <title>WealthWise</title>
 
         <!-- Styles -->
-        <link rel="stylesheet" href="{% static 'assets/vendors/mdi/css/materialdesignicons.min.css' %}">
         <link rel="stylesheet" href="{% static 'assets/css/style.css' %}">
-        <link rel="shortcut icon" href="{% static 'assets/images/favicon.png' %}">
+        <link rel="stylesheet" href="{% static 'assets/vendors/mdi/css/materialdesignicons.min.css' %}">
         <link rel="stylesheet" href="{% static 'assets/vendors/font-awesome/css/font-awesome.min.css' %}">
+
+        <link rel="shortcut icon" href="{% static 'assets/images/favicon.png' %}">
     </head>
     <body>
         <div class="container-scroller">
             <!-- Sidebar -->
-            {% include "sidebar.html" %}
+            {% include "base/sidebar.html" %}
             <div class="container-fluid page-body-wrapper">
                 <!-- Header -->
-                {% include "header.html" %}
+                {% include "base/header.html" %}
 
                 <!-- Content -->
                 <div class="main-panel">
@@ -29,7 +30,7 @@
                     </div>
 
                     <!-- Footer -->
-                    {% include "footer.html" %}
+                    {% include "base/footer.html" %}
                 </div>
             </div>
         </div>
