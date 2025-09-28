@@ -14,11 +14,11 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
-from django.urls import path, re_path as url
+from django.urls import re_path as url
 
 from core import views as core_views
 
 urlpatterns = [
-    url(r'^$', core_views.dashboard , name=""),
     url(r'^dashboard$', core_views.dashboard , name="dashboard"),
+    url(r'.*', core_views.page_not_found , name="page-not-found"),
 ]
