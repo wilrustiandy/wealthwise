@@ -3,7 +3,7 @@ from django.shortcuts import render
 # Create your views here.
 def dashboard(request):
     data = {}
-    return render(request, 'base/dashboard.html', data)
+    return render(request, 'main/dashboard.html', data)
 
 def page_not_found(request, exception=None):
     data = {

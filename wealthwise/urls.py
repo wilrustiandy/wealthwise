@@ -19,6 +19,10 @@ from django.urls import re_path as url
 from core import views as core_views
 
 urlpatterns = [
+
+    # Main
     url(r'^dashboard$', core_views.dashboard , name="dashboard"),
+
+    # Errors
     url(r'.*', core_views.page_not_found , name="page-not-found"),
 ]
