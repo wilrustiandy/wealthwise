@@ -1,0 +1,129 @@
+{% extends "pages/user/base.html" %}
+{% load static %}
+
+{% block title %}
+   Register
+{% endblock %}
+
+{% block content %}
+<h3 class="card-title text-start mb-3">Register</h3>
+<form method="POST" id="registerForm">
+  {% csrf_token %}
+  <div class="form-group">
+    <label>Full Name</label>
+    <input name="fullname" id="fullname" type="text" class="form-control p_input {% if form.fullname.errors %}is-invalid{% endif %}" required>
+    <small class="text-danger {% if not form.fullname.errors %}d-none{% endif %}" id="fullnameError">Name must start with a letter and contain only letters and spaces.</small>
+  </div>
+  <div class="form-group">
+    <label>Username</label>
+    <input name="username" id="username" type="text" class="form-control p_input {% if form.username.errors %}is-invalid{% endif %}" required>
+    <small class="text-danger {% if not form.username.errors %}d-none{% endif %}" id="usernameError">Username must start with a letter and may contain letters, numbers, and underscores (_).</small>
+  </div>
+  <div class="form-group">
+    <label>Email</label>
+    <input name="email" id="email" type="text" class="form-control p_input {% if form.email.errors %}is-invalid{% endif %}" required>
+    <small class="text-danger {% if not form.email.errors %}d-none{% endif %}" id="emailError">Please enter a valid email (must start with a letter).</small>
+  </div>
+  <div class="form-group position-relative">
+    <label>Password</label>
+    <div class="input-group">
+        <input name="password" id="password" type="password" class="form-control p_input {% if form.password.errors %}is-invalid{% endif %}" required>
+        <button type="button" class="btn btn-outline-secondary" id="togglePassword">
+          <i class="mdi mdi-eye-off" id="toggleIcon"></i>
+        </button>
+      </div>
+    <small class="text-danger {% if not form.password.errors %}d-none{% endif %}" id="passwordError">Password must not be empty or contain spaces.</small>
+  </div>
+  <div class="form-group d-flex align-items-center justify-content-end">
+    <a href="#" class="forgot-pass">Forgot password</a>
+  </div>
+  <div class="text-center d-grid gap-2">
+    <button type="submit" class="btn btn-primary btn-block enter-btn">Submit</button>
+  </div>
+  <div class="d-flex">
+    <button class="btn btn-google col">
+      <i class="mdi mdi-google-plus"></i> Google plus </button>
+  </div>
+  <p class="sign-up text-center">Already have an Account? <a href="{% url 'user-login' %}">Login</a></p>
+</form>
+
+<script>
+function validate() {
+  const validation = [
+    {
+      "element": "username",
+      "regex": /^[A-Za-z][A-Za-z0-9_]*$/
+    },
+    {
+      "element": "fullname",
+      "regex": /^[A-Za-z][A-Za-z\s]*$/
+    },
+    {
+      "element": "email",
+      "regex": /^[A-Za-z][A-Za-z0-9._%+-]*@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/
+    },
+    {
+      "element": "password",
+      "regex": /^\S+$/
+    },
+  ];
+
+  // Validate
+  validation.forEach(field => {
+    const element = $("#" + field.element);
+    const errorElement = $("#" + field.element + "Error");
+
+    $("#"+field.element).on("input blur", function() {
+      const value = $(this).val().trim();
+      if (field.regex.test(value)) {
+        $(this).removeClass("is-invalid");
+        $("#"+field.element+"Error").addClass("d-none");
+      } else {
+        $(this).addClass("is-invalid");
+        $("#"+field.element+"Error").removeClass("d-none");
+      }
+    })
+  });
+}
+
+$(document).ready(function() {
+    // Prevent leading spaces while typing
+    $(".p_input").on("input", function() {
+        if (/^\s/.test($(this).val())) {
+            $(this).val($(this).val().trimStart());
+        }
+    });
+
+    // Force-trim password
+    $("#password").on("input", function() {
+        $(this).val($(this).val().trim());
+    });
+
+    // Toggle password show/hide
+    $("#togglePassword").on("click", function() {
+        const passwordField = $("#password");
+        const icon = $("#toggleIcon");
+
+        if (passwordField.attr("type") === "password") {
+            passwordField.attr("type", "text");
+            icon.removeClass("mdi-eye-off").addClass("mdi-eye");
+        } else {
+            passwordField.attr("type", "password");
+            icon.removeClass("mdi-eye").addClass("mdi-eye-off");
+        }
+    });
+
+    validate();
+
+    $("#registerForm").on("submit", function(event) {
+      if ($(".is-invalid").length > 0) {
+        event.preventDefault(); // stop form submission
+        console.warn("Form submission blocked — one or more fields are invalid.");
+        return;
+      }
+
+      this.submit();
+    });
+});  
+</script>
+{% endblock %}
