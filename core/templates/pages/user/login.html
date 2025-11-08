@@ -42,23 +42,8 @@
 
 <script>
 function validate() {
-  const validation = [
-    {
-      "element": "usernameOrEmail",
-      "regex": /^[A-Za-z][A-Za-z0-9_]*$/
-    },
-    {
-      "element": "usernameOrEmail",
-      "regex": /^[A-Za-z][A-Za-z0-9._%+-]*@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/
-    },
-    {
-      "element": "password",
-      "regex": /^\S+$/
-    },
-  ];
-  
   const usernameRegex = /^[A-Za-z][A-Za-z0-9_]*$/;
-  const emailRegex = /^[A-Za-z][A-Za-z0-9_]*$/;
+  const emailRegex = /^[A-Za-z][A-Za-z0-9._%+-]*@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
   const passwordRegex = /^\S+$/
 
   // Validate username or email
