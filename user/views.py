@@ -1,10 +1,12 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth.models import User
 from django.db import IntegrityError, transaction
+from django.utils.safestring import mark_safe
 import django.contrib.auth as auth
 import django.contrib.messages as messages
 
 from user.forms import UserForm
+from core.utils import get_form_errors
 
 # Create your views here.
 def login(request):
@@ -56,12 +58,14 @@ def register(request):
                     return redirect('user-login')
                 
                 else:
-                    messages.error(request, "Registration failed!")
-                    print("Form errors:", form.errors)
+                    error = get_form_errors(form.errors)
+                    print("Form error: " + error)
+                    messages.error(request, mark_safe(f"Registration failed!!<br>{error}"))
 
-            except IntegrityError as e:
-                messages.error(request, "Registration failed!")
-                return redirect('internal-server-error', e)
+            except IntegrityError as error:
+                print("Integrity error: ", error)
+                messages.error(request, mark_safe(f"Registration failed!!<br>{str(error)}"))
+                return redirect('internal-server-error', error)
 
     data = {
         'form': form

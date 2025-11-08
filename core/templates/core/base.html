@@ -85,32 +85,38 @@
     <script>
         $(document).ready(function() {
             {% if messages %}
+                let messageTags = "";
+                const modal = $("#messageModal");
+                const messageText = $("#messageText");
+                let allMessages = "";
+
                 {% for message in messages %}
-                    let messageTags = "{{ message.tags }}";
-                    const modal = $("#messageModal");
-    
-                    $("#messageText").text("{{ message|escapejs }}");
-    
+                    messageTags = "{{ message.tags }}";
+                    allMessages += "{{ message|safe }}<br>";
+                {% endfor %}
+
+                if (allMessages.trim().length > 0) {
+                    messageText.html(allMessages);
+
                     if (messageTags === "success") {
                         $('.modal-content').addClass("bg-success text-white")
                     } else if (messageTags === "error") {
                         $('.modal-content').addClass("bg-danger text-white")
                     }
-    
+
                     modal.removeClass("d-none")
-    
+
                     // Show animation
                     var messageModal = new bootstrap.Modal(modal[0]);
                     messageModal.show();
                     
                     // Auto hide after 2 seconds with fade
                     setTimeout(() => {
-                        modal.fadeOut(600, function() {
+                        modal.fadeOut(1000, function() {
                             messageModal.hide();
-                            modal.show(); // reset for next message
                         });
-                    }, 1000);
-                {% endfor %}
+                    }, 2000);
+                }
             {% endif %}
 
             $('#confirmationModal').on('show.bs.modal', function (event) {
