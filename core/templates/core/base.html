@@ -20,6 +20,21 @@
         <script src="{% static 'assets/js/jquery.min.js' %}"></script>
     </head>
     <body>
+        <!-- Message Modal -->
+        <div class="modal fade" id="messageModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-top">
+              <div class="modal-content">
+                <div class="modal-body" id="messageText">
+                    {% for message in messages %}
+                        {{ message }}
+                    {% endfor %}
+                  <!-- Message content will go here -->
+                </div>
+              </div>
+            </div>
+        </div>
+
+        <!-- Body -->
         <div class="container-scroller">
             <!-- Sidebar -->
             {% include "core/sidebar.html" %}
@@ -40,4 +55,38 @@
             </div>
         </div>
     </body>
+
+    <!-- Message Modal Script -->
+    <script>
+        $(document).ready(function() {
+            {% if messages %}
+                {% for message in messages %}
+                    let messageTags = "{{ message.tags }}";
+                    const modal = $("#messageModal");
+    
+                    $("#messageText").text("{{ message|escapejs }}");
+    
+                    if (messageTags === "success") {
+                        $('.modal-content').addClass("bg-success text-white")
+                    } else if (messageTags === "error") {
+                        $('.modal-content').addClass("bg-danger text-white")
+                    }
+    
+                    modal.removeClass("d-none")
+    
+                    // Show animation
+                    var messageModal = new bootstrap.Modal(modal[0]);
+                    messageModal.show();
+                    
+                    // Auto hide after 2 seconds with fade
+                    setTimeout(() => {
+                        modal.fadeOut(600, function() {
+                            messageModal.hide();
+                            modal.show(); // reset for next message
+                        });
+                    }, 1000);
+                {% endfor %}
+            {% endif %}
+        });
+    </script>
 </html>
