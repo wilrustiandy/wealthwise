@@ -27,6 +27,7 @@ urlpatterns = [
 
     # User
     url(r'^user/login$', user_views.login, name="user-login"),
+    url(r'^user/logout$', user_views.logout, name="user-logout"),
     url(r'^user/register$', user_views.register, name="user-register"),
 
     # Error

@@ -31,6 +31,11 @@ def login(request):
 
     return render(request, 'pages/user/login.html')
 
+def logout(request):
+    auth.logout(request)
+    messages.success(request, "You have been logged out successfully.")
+    return redirect('user-login')
+
 def register(request):
     form = UserForm()
 
@@ -48,7 +53,7 @@ def register(request):
 
                     auth.login(request, user)
                     messages.success(request, "Registration successful!")
-                    return redirect('dashboard')
+                    return redirect('user-login')
                 
                 else:
                     messages.error(request, "Registration failed!")
