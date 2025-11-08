@@ -1,0 +1,129 @@
+{% extends "pages/user/base.html" %}
+{% load static %}
+
+{% block title %}
+   Login
+{% endblock %}
+
+{% block content %}
+<h3 class="card-title text-start mb-3">Login</h3>
+<form method="POST" id="loginForm">
+  {% csrf_token %}
+  <div class="form-group">
+    <label>Username or email</label>
+    <input name="usernameOrEmail" id="usernameOrEmail" type="text" class="form-control p_input {% if form.username_email.errors %}is-invalid{% endif %}" required>
+    <small class="text-danger {% if not form.username_email.errors %}d-none{% endif %}" id="usernameOrEmailError">
+      Enter a valid username (letters, numbers, underscore, must start with a letter) 
+      or a valid email address.
+    </small>
+  </div>
+  <div class="form-group position-relative">
+    <label>Password</label>
+    <div class="input-group">
+        <input name="password" id="password" type="password" class="form-control p_input {% if form.password.errors %}is-invalid{% endif %}" required>
+        <button type="button" class="btn btn-outline-secondary" id="togglePassword">
+          <i class="mdi mdi-eye-off" id="toggleIcon"></i>
+        </button>
+      </div>
+    <small class="text-danger {% if not form.password.errors %}d-none{% endif %}" id="passwordError">Password must not be empty or contain spaces.</small>
+  </div>
+  <div class="form-group d-flex align-items-center justify-content-end">
+    <a href="#" class="forgot-pass">Forgot password</a>
+  </div>
+  <div class="text-center d-grid gap-2">
+    <button type="submit" class="btn btn-primary btn-block enter-btn">Login</button>
+  </div>
+  <div class="d-flex">
+    <button class="btn btn-google col">
+      <i class="mdi mdi-google-plus"></i> Google plus </button>
+  </div>
+  <p class="sign-up">Don't have an Account? <a href="{% url 'user-register' %}">Register</a></p>
+</form>
+
+<script>
+function validate() {
+  const validation = [
+    {
+      "element": "usernameOrEmail",
+      "regex": /^[A-Za-z][A-Za-z0-9_]*$/
+    },
+    {
+      "element": "usernameOrEmail",
+      "regex": /^[A-Za-z][A-Za-z0-9._%+-]*@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/
+    },
+    {
+      "element": "password",
+      "regex": /^\S+$/
+    },
+  ];
+  
+  const usernameRegex = /^[A-Za-z][A-Za-z0-9_]*$/;
+  const emailRegex = /^[A-Za-z][A-Za-z0-9_]*$/;
+  const passwordRegex = /^\S+$/
+
+  // Validate username or email
+  $("#usernameOrEmail").on("input blur", function() {
+    const value = $(this).val().trim();
+    if (usernameRegex.test(value) || emailRegex.test(value)) {
+      $(this).removeClass("is-invalid");
+      $("#usernameOrEmailError").addClass("d-none");
+    } else {
+      $(this).addClass("is-invalid");
+      $("#usernameOrEmailError").removeClass("d-none");
+    }
+  })
+
+  // Validate password
+  $("#password").on("input blur", function() {
+    const value = $(this).val().trim();
+    if (passwordRegex.test(value)) {
+      $(this).removeClass("is-invalid");
+      $("#passwordError").addClass("d-none");
+    } else {
+      $(this).addClass("is-invalid");
+      $("#passwordError").removeClass("d-none");
+    }
+  })
+}
+
+$(document).ready(function() {
+  // Prevent leading spaces while typing
+  $(".p_input").on("input", function() {
+      if (/^\s/.test($(this).val())) {
+          $(this).val($(this).val().trimStart());
+      }
+  });
+
+  // Force-trim password
+  $("#password").on("input", function() { 
+    $(this).val($(this).val().trim());
+  });
+
+  // Toggle password show/hide
+  $("#togglePassword").on("click", function() {
+      const passwordField = $("#password");
+      const icon = $("#toggleIcon");
+
+      if (passwordField.attr("type") === "password") {
+          passwordField.attr("type", "text");
+          icon.removeClass("mdi-eye-off").addClass("mdi-eye");
+      } else {
+          passwordField.attr("type", "password");
+          icon.removeClass("mdi-eye").addClass("mdi-eye-off");
+      }
+  });
+
+  validate();
+
+  $("#loginForm").on("submit", function(event) {
+    if ($(".is-invalid").length > 0) {
+      event.preventDefault(); // stop form submission
+      console.warn("Form submission blocked — one or more fields are invalid.");
+      return;
+    }
+
+    this.submit();
+  });
+});
+</script>
+{% endblock %}

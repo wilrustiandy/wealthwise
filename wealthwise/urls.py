@@ -15,14 +15,21 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.urls import re_path as url
+from django.contrib.auth.decorators import login_required
 
 from core import views as core_views
+from user import views as user_views
 
 urlpatterns = [
+    # Dashboard
+    url(r'^$', login_required(core_views.dashboard), name="dashboard"),
+    url(r'^dashboard$', login_required(core_views.dashboard), name="dashboard"),
 
-    # Main
-    url(r'^dashboard$', core_views.dashboard , name="dashboard"),
+    # User
+    url(r'^user/login$', user_views.login, name="user-login"),
+    url(r'^user/register$', user_views.register, name="user-register"),
 
-    # Errors
-    url(r'.*', core_views.page_not_found , name="page-not-found"),
+    # Error
+    url(r'error', core_views.internal_server_error, name="internal-server-error"),
+    url(r'.*', core_views.page_not_found, name="page-not-found"),
 ]

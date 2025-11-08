@@ -7,6 +7,30 @@ import django.contrib.messages as messages
 from user.forms import UserForm
 
 # Create your views here.
+def login(request):
+    if request.method == "POST":
+        username_or_email = request.POST['usernameOrEmail']
+        password = request.POST['password']
+        
+        # Try to get user by email
+        try:
+            user_obj = User.objects.get(email=username_or_email)
+            username = user_obj.username
+        except User.DoesNotExist:
+            username = username_or_email  # Assume they entered username
+
+        # Authenticate using username
+        user = auth.authenticate(request, username=username, password=password)
+
+        if user:
+            auth.login(request, user)
+            messages.success(request, "Login successful!")
+            return redirect('dashboard')
+        else:
+            messages.error(request, "Login failed! Wrong username or password")
+
+    return render(request, 'pages/user/login.html')
+
 def register(request):
     form = UserForm()
 
