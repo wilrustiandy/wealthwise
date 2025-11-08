@@ -54,6 +54,31 @@
                 </div>
             </div>
         </div>
+
+        <!-- Confirmation Modal -->
+        <div class="modal fade" id="confirmationModal" tabindex="-1" aria-labelledby="confirmationModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content bg-dark">
+                <div class="modal-header border-0">
+					<h5 class="modal-title" id="confirmationModalLabel">
+						<i class="fa fa-question-circle me-2"></i> Confirm Action
+					</h5>
+					<button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+				</div>
+                <div class="modal-body">
+					<p class="fs-5" id="confirmationText"></p>
+				</div>
+                <div class="modal-footer border-0">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+						<i class="fa fa-times me-2"></i> Cancel
+					</button>
+				   <a class="btn btn-danger" id="confirmActionButton" href="#">
+					  <i class="fa fa-check me-2"></i> Confirm
+				   </a>
+                </div>
+            </div>
+            </div>
+        </div> 
     </body>
 
     <!-- Message Modal Script -->
@@ -87,6 +112,23 @@
                     }, 1000);
                 {% endfor %}
             {% endif %}
+
+            $('#confirmationModal').on('show.bs.modal', function (event) {
+                // Button that triggered the modal
+                var button = $(event.relatedTarget);
+        
+                // Extract the URL and name from data attributes
+                var url = button.data('url');
+                var action = button.data('action');
+                var name = button.data('name');
+                var confirmationText = `Are you sure you want to ${action} <strong>${name}</strong>?`;
+        
+                // Update the href attribute of the confirm button in the modal
+                $('#confirmActionButton').attr('href', url);
+        
+                // Optionally update the confirmation text in the modal
+                $('#confirmationText').html(confirmationText);
+            });
         });
     </script>
 </html>
