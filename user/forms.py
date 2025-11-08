@@ -19,6 +19,9 @@ class UserForm(forms.ModelForm):
         username_regex = r'^[A-Za-z][A-Za-z0-9_]*$'
         if not re.match(username_regex, username):
             raise forms.ValidationError("Username regex not match")
+        # Check uniqueness in the database
+        if User.objects.filter(username=username).exists():
+            raise forms.ValidationError("Username already registered! Please use other username")
         return username
 
     def clean_fullname(self):
@@ -33,6 +36,9 @@ class UserForm(forms.ModelForm):
         email_regex = r'^[A-Za-z][A-Za-z0-9._%+-]*@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$'
         if not re.match(email_regex, email):
             raise forms.ValidationError("Email regex not match")
+        # Check uniqueness in the database
+        if User.objects.filter(email=email).exists():
+            raise forms.ValidationError("Email already registered! Please use other email")
         return email
 
     def clean_password(self):
