@@ -25,12 +25,17 @@ urlpatterns = [
     url(r'^$', login_required(core_views.dashboard), name="dashboard"),
     url(r'^dashboard$', login_required(core_views.dashboard), name="dashboard"),
 
+    # Settings
+    url(r'^settings$', login_required(core_views.settings), name="settings"),
+    url(r'^settings/edit-fullname$', login_required(core_views.edit_fullname), name="edit-fullname"),
+    url(r'^settings/edit-password$', login_required(core_views.edit_password), name="edit-password"),
+
     # User
     url(r'^user/login$', user_views.login, name="user-login"),
     url(r'^user/logout$', user_views.logout, name="user-logout"),
     url(r'^user/register$', user_views.register, name="user-register"),
 
-    # Error
+    # Errors
     url(r'error', core_views.internal_server_error, name="internal-server-error"),
     url(r'.*', core_views.page_not_found, name="page-not-found"),
 ]
