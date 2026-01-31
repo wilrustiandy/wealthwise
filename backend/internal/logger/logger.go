@@ -23,8 +23,6 @@ const (
 	FATAL
 )
 
-var levelNames = []string{"DEBUG", "INFO", "WARN", "ERROR", "FATAL"}
-
 type Logger struct {
 	level Level
 	mu    sync.Mutex
@@ -34,7 +32,6 @@ func New(level Level) *Logger {
 	return &Logger{level: level}
 }
 
-// Global instance for convenience
 var logger *Logger
 
 func Init(level Level) *Logger {
@@ -47,6 +44,40 @@ func GetLogger() *Logger {
 		Init(INFO)
 	}
 	return logger
+}
+
+func GetLevel(name string) Level {
+	switch strings.ToUpper(name) {
+	case "DEBUG":
+		return DEBUG
+	case "INFO":
+		return INFO
+	case "WARN":
+		return WARN
+	case "ERROR":
+		return ERROR
+	case "FATAL":
+		return FATAL
+	default:
+		return INFO
+	}
+}
+
+func GetLevelString(level Level) string {
+	switch level {
+	case DEBUG:
+		return "DEBUG"
+	case INFO:
+		return "INFO"
+	case WARN:
+		return "WARN"
+	case ERROR:
+		return "ERROR"
+	case FATAL:
+		return "FATAL"
+	default:
+		return "INFO"
+	}
 }
 
 func (l *Logger) Debug(format string, messages ...any) {
@@ -130,7 +161,7 @@ func (l *Logger) internalLog(level Level, context string, format string, message
 		caller = fmt.Sprintf("%s:%d", filepath.Base(file), line)
 	}
 
-	output := fmt.Sprintf("[%s] %s %s %s - Message: %s\n", levelNames[level], timestamp, caller, context, message)
+	output := fmt.Sprintf("[%s] %s %s %s - Message: %s\n", GetLevelString(level), timestamp, caller, context, message)
 
 	l.mu.Lock()
 	defer l.mu.Unlock()

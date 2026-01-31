@@ -3,19 +3,27 @@ package main
 import (
 	"context"
 	"errors"
+	"fmt"
 	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
 
+	"github.com/wilrustiandy/wealthwise/backend/config"
 	"github.com/wilrustiandy/wealthwise/backend/internal/logger"
 )
 
 func main() {
-	log := logger.Init(logger.INFO)
+	cfg, err := config.Load()
+	if err != nil {
+		fmt.Printf("Failed to load config: %v\n", err)
+		os.Exit(1)
+	}
 
-	host := "localhost:8080"
+	log := logger.Init(logger.GetLevel(cfg.Log.Level))
+
+	host := cfg.Address + ":" + cfg.Port
 
 	server := &http.Server{
 		Addr:    host,
