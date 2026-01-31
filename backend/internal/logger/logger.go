@@ -23,31 +23,25 @@ const (
 	FATAL
 )
 
-type Logger struct {
-	level Level
-	mu    sync.Mutex
-}
-
-func New(level Level) *Logger {
-	return &Logger{level: level}
-}
-
-var logger *Logger
-
-func Init(level Level) *Logger {
-	logger = New(level)
-	return logger
-}
-
-func GetLogger() *Logger {
-	if logger == nil {
-		Init(INFO)
+func (l Level) String() string {
+	switch l {
+	case DEBUG:
+		return "DEBUG"
+	case INFO:
+		return "INFO"
+	case WARN:
+		return "WARN"
+	case ERROR:
+		return "ERROR"
+	case FATAL:
+		return "FATAL"
+	default:
+		return "INFO"
 	}
-	return logger
 }
 
-func GetLevel(name string) Level {
-	switch strings.ToUpper(name) {
+func ParseLevel(name string) Level {
+	switch strings.ToUpper(strings.TrimSpace(name)) {
 	case "DEBUG":
 		return DEBUG
 	case "INFO":
@@ -63,21 +57,27 @@ func GetLevel(name string) Level {
 	}
 }
 
-func GetLevelString(level Level) string {
-	switch level {
-	case DEBUG:
-		return "DEBUG"
-	case INFO:
-		return "INFO"
-	case WARN:
-		return "WARN"
-	case ERROR:
-		return "ERROR"
-	case FATAL:
-		return "FATAL"
-	default:
-		return "INFO"
+type Logger struct {
+	level Level
+	mu    sync.Mutex
+}
+
+var logger *Logger
+
+func Init() *Logger {
+	logger = &Logger{level: INFO}
+	return logger
+}
+
+func GetLogger() *Logger {
+	if logger == nil {
+		Init()
 	}
+	return logger
+}
+
+func (l *Logger) SetLevel(level Level) {
+	l.level = level
 }
 
 func (l *Logger) Debug(format string, messages ...any) {
@@ -161,7 +161,7 @@ func (l *Logger) internalLog(level Level, context string, format string, message
 		caller = fmt.Sprintf("%s:%d", filepath.Base(file), line)
 	}
 
-	output := fmt.Sprintf("[%s] %s %s %s - Message: %s\n", GetLevelString(level), timestamp, caller, context, message)
+	output := fmt.Sprintf("[%s] %s %s %s - Message: %s\n", level.String(), timestamp, caller, context, message)
 
 	l.mu.Lock()
 	defer l.mu.Unlock()

@@ -28,7 +28,7 @@ func Load() (*Config, error) {
 	}
 
 	if _, err := os.Stat(configFileName); errors.Is(err, os.ErrNotExist) {
-		return &cfg, nil
+		return &cfg, err
 	}
 
 	fileData, err := os.ReadFile(configFileName)

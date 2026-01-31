@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"errors"
-	"fmt"
 	"net/http"
 	"os"
 	"os/signal"
@@ -15,13 +14,18 @@ import (
 )
 
 func main() {
+	log := logger.Init()
+
 	cfg, err := config.Load()
 	if err != nil {
-		fmt.Printf("Failed to load config: %v\n", err)
-		os.Exit(1)
+		if errors.Is(err, os.ErrNotExist) {
+			log.Warn("Config file not found!! Apply default config")
+		} else {
+			log.Fatal("Failed to load config: %v", err)
+		}
 	}
 
-	log := logger.Init(logger.GetLevel(cfg.Log.Level))
+	log.SetLevel(logger.ParseLevel(cfg.Log.Level))
 
 	host := cfg.Address + ":" + cfg.Port
 
