@@ -1,23 +1,19 @@
 package main
 
 import (
-	"log/slog"
 	"net/http"
-	"os"
 
-	"github.com/wilrustiandy/wealthwise/internal/logger"
+	"github.com/wilrustiandy/wealthwise/backend/internal/logger"
 )
 
 func main() {
-	logger.InitLogger()
+	log := logger.Init(logger.INFO)
 
-	addr := "localhost"
-	port := "8080"
+	host := "localhost:8080"
 
-	slog.Info("WealthWise Backend starting on %s:%s", addr, port)
-	if err := http.ListenAndServe(addr, nil); err != nil {
-		logger.Fatal("Server failed to start: %v", err)
-		os.Exit(1)
+	log.Info("WealthWise Backend starting on %s", host)
+	if err := http.ListenAndServe(host, nil); err != nil {
+		log.Fatal("Server failed to start: %v", err)
 	}
-	slog.Info("WealthWise Backend started!!")
+	log.Info("WealthWise Backend started!!")
 }

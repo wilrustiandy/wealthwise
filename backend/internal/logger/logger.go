@@ -16,9 +16,10 @@ const (
 	INFO
 	WARN
 	ERROR
+	FATAL
 )
 
-var levelNames = []string{"DEBUG", "INFO", "WARN", "ERROR"}
+var levelNames = []string{"DEBUG", "INFO", "WARN", "ERROR", "FATAL"}
 
 type Logger struct {
 	level Level
@@ -32,30 +33,45 @@ func New(level Level) *Logger {
 // Global instance for convenience
 var logger *Logger
 
-func Init(level Level) {
+func Init(level Level) *Logger {
 	logger = New(level)
+	return logger
 }
 
-func Debug(msg string) {
-	logger.log(DEBUG, msg)
+func GetLogger() *Logger {
+	if logger == nil {
+		Init(INFO)
+	}
+	return logger
 }
 
-func Info(msg string) {
-	logger.log(INFO, msg)
+func (l *Logger) Debug(format string, messages ...any) {
+	l.log(DEBUG, format, messages...)
 }
 
-func Warn(msg string) {
-	logger.log(WARN, msg)
+func (l *Logger) Info(format string, messages ...any) {
+	l.log(INFO, format, messages...)
 }
 
-func Error(msg string) {
-	logger.log(ERROR, msg)
+func (l *Logger) Warn(format string, messages ...any) {
+	l.log(WARN, format, messages...)
 }
 
-func (l *Logger) log(level Level, msg string) {
+func (l *Logger) Error(format string, messages ...any) {
+	l.log(ERROR, format, messages...)
+}
+
+func (l *Logger) Fatal(format string, messages ...any) {
+	l.log(FATAL, format, messages...)
+	os.Exit(1)
+}
+
+func (l *Logger) log(level Level, format string, messages ...any) {
 	if level < l.level {
 		return
 	}
+
+	message := fmt.Sprintf(format, messages...)
 
 	timestamp := time.Now().UTC().Format("2006-01-02T15:04:05Z")
 
@@ -65,9 +81,13 @@ func (l *Logger) log(level Level, msg string) {
 		caller = fmt.Sprintf("%s:%d", filepath.Base(file), line)
 	}
 
-	output := fmt.Sprintf("[%s] %s %s - %s\n", levelNames[level], timestamp, caller, msg)
+	output := fmt.Sprintf("[%s] %s %s - %s\n", levelNames[level], timestamp, caller, message)
 
 	l.mu.Lock()
 	defer l.mu.Unlock()
-	os.Stdout.WriteString(output)
+	if level >= ERROR {
+		os.Stderr.WriteString(output)
+	} else {
+		os.Stdout.WriteString(output)
+	}
 }
