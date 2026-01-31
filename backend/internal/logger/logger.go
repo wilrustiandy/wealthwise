@@ -1,12 +1,16 @@
 package logger
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"path/filepath"
 	"runtime"
+	"strings"
 	"sync"
 	"time"
+
+	ctxkey "github.com/wilrustiandy/wealthwise/backend/internal/context"
 )
 
 type Level int
@@ -53,12 +57,24 @@ func (l *Logger) Info(format string, messages ...any) {
 	l.log(INFO, format, messages...)
 }
 
+func (l *Logger) InfoCtx(ctx context.Context, format string, messages ...any) {
+	l.logCtx(ctx, INFO, format, messages...)
+}
+
 func (l *Logger) Warn(format string, messages ...any) {
 	l.log(WARN, format, messages...)
 }
 
+func (l *Logger) WarnCtx(ctx context.Context, format string, messages ...any) {
+	l.logCtx(ctx, WARN, format, messages...)
+}
+
 func (l *Logger) Error(format string, messages ...any) {
 	l.log(ERROR, format, messages...)
+}
+
+func (l *Logger) ErrorCtx(ctx context.Context, format string, messages ...any) {
+	l.logCtx(ctx, ERROR, format, messages...)
 }
 
 func (l *Logger) Fatal(format string, messages ...any) {
@@ -66,7 +82,40 @@ func (l *Logger) Fatal(format string, messages ...any) {
 	os.Exit(1)
 }
 
+func (l *Logger) FatalCtx(ctx context.Context, format string, messages ...any) {
+	l.logCtx(ctx, FATAL, format, messages...)
+}
+
 func (l *Logger) log(level Level, format string, messages ...any) {
+	if level < l.level {
+		return
+	}
+	l.internalLog(level, "", format, messages...)
+}
+
+func (l *Logger) logCtx(ctx context.Context, level Level, format string, messages ...any) {
+	if level < l.level {
+		return
+	}
+
+	var contextKeyValues []string
+
+	for _, key := range ctxkey.ContextKeys {
+		if value, ok := ctx.Value(key).(string); ok && value != "" {
+			contextKeyValues = append(contextKeyValues, fmt.Sprintf("%s:%s", key, value))
+		}
+	}
+
+	contextString := ""
+
+	if len(contextKeyValues) > 0 {
+		contextString = strings.Join(contextKeyValues, " ")
+	}
+
+	l.internalLog(level, contextString, format, messages...)
+}
+
+func (l *Logger) internalLog(level Level, context string, format string, messages ...any) {
 	if level < l.level {
 		return
 	}
@@ -81,7 +130,7 @@ func (l *Logger) log(level Level, format string, messages ...any) {
 		caller = fmt.Sprintf("%s:%d", filepath.Base(file), line)
 	}
 
-	output := fmt.Sprintf("[%s] %s %s - %s\n", levelNames[level], timestamp, caller, message)
+	output := fmt.Sprintf("[%s] %s %s %s - Message: %s\n", levelNames[level], timestamp, caller, context, message)
 
 	l.mu.Lock()
 	defer l.mu.Unlock()
