@@ -1,9 +1,10 @@
 package config
 
 const defaultConfig = `
-addr: localhost
-port: 8080
-env: dev
+app:
+    address: localhost
+    port: 8080
+
 log:
     level: DEBUG
 `

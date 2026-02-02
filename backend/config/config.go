@@ -7,15 +7,18 @@ import (
 	yaml "gopkg.in/yaml.v3"
 )
 
+type AppConfig struct {
+	Address string `yaml:"address"`
+	Port    string `yaml:"port"`
+}
+
 type LogConfig struct {
 	Level string `yaml:"level"`
 }
 
 type Config struct {
-	Address string    `yaml:"addr"`
-	Port    string    `yaml:"port"`
-	Env     string    `yaml:"env"`
-	Log     LogConfig `yaml:"log"`
+	App AppConfig `yaml:"app"`
+	Log LogConfig `yaml:"log"`
 }
 
 const configFileName = "config.yaml"

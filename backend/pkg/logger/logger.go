@@ -10,7 +10,7 @@ import (
 	"sync"
 	"time"
 
-	ctxkey "github.com/wilrustiandy/wealthwise/backend/internal/context"
+	ctxkey "github.com/wilrustiandy/wealthwise/backend/pkg/context"
 )
 
 type Level int
