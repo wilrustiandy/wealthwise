@@ -1,0 +1,19 @@
+input.p_input:-webkit-autofill,
+input.p_input:-webkit-autofill:hover {
+    -webkit-box-shadow: 0 0 0px 1000px #2A3038 inset !important;
+    -webkit-text-fill-color: #ffffff !important;
+    border: 1px solid transparent !important;
+    transition: background-color 1s ease-in-out 0s, color 1s ease-in-out 0s !important;
+}
+input.p_input:-webkit-autofill:focus {
+    -webkit-box-shadow: 0 0 0px 1000px #2A3038 inset !important;
+    -webkit-text-fill-color: #ffffff !important;
+    caret-color: #ffffff !important;
+    border: 1px solid rgba(71, 164, 71, 0.5) !important;
+}
+input.p_input:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0px 1000px #2A3038 inset !important;
+    -webkit-text-fill-color: #ffffff !important;
+    caret-color: #ffffff !important;
+    border: 1px solid rgba(71, 164, 71, 0.5) !important;
+}
