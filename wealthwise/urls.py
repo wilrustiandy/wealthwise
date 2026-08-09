@@ -29,4 +29,8 @@ urlpatterns = [
     url(r'^user/login$', user_views.login, name="user-login"),
     url(r'^user/logout$', user_views.logout, name="user-logout"),
     url(r'^user/register$', user_views.register, name="user-register"),
+
+    # Errors
+    url(r'error', core_views.internal_server_error, name="internal-server-error"),
+    url(r'.*', core_views.page_not_found, name="page-not-found"),
 ]
