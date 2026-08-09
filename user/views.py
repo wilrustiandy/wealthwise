@@ -5,7 +5,7 @@ from django.utils.safestring import mark_safe
 import django.contrib.auth as auth
 import django.contrib.messages as messages
 
-from user.forms import UserForm
+from user.forms import UserForm, EditProfileForm, EditFullNameForm, EditPasswordForm
 from core.utils import get_form_errors
 
 # Create your views here.
@@ -71,3 +71,58 @@ def register(request):
         'form': form
     }
     return render(request, 'pages/user/register.html', data)
+
+def profile(request):
+    form = EditProfileForm(request.POST or None, instance=request.user)
+
+    if request.method == "POST":
+        with transaction.atomic():
+            try:
+                if form.is_valid():
+                    form.save()
+                    messages.success(request, "Profile updated successfully!")
+                
+                else:
+                    error = get_form_errors(form.errors)
+                    print("Form error: " + error)
+                    messages.error(request, mark_safe(f"Update profile failed!!<br>{error}"))
+            
+            except IntegrityError as error:
+                print("Integrity error: ", error)
+                messages.error(request, mark_safe(f"Update profile failed!!<br>{str(error)}"))
+                return redirect('internal-server-error', error)
+    
+    data = {
+        'form': form
+    }
+    return render(request, 'pages/user/profile.html', data)
+
+def edit_fullname(request):
+    if request.method == "POST":
+        form = EditFullNameForm(request.POST)
+        if form.is_valid():
+            fullname = form.cleaned_data['fullname']
+            request.user.first_name = fullname  # or split into first_name/last_name if needed
+            request.user.save()
+            messages.success(request, "Full name updated successfully!")
+        else:
+            errors = "<br>".join([str(err) for err in form.errors.values()])
+            messages.error(request, mark_safe(f"Failed to update full name<br>{errors}"))
+
+    return redirect('settings')
+
+def edit_password(request):
+    if request.method == "POST":
+        form = EditPasswordForm(request.POST, user=request.user)
+        if form.is_valid():
+            new_password = form.cleaned_data['new_password']
+            user = request.user
+            user.set_password(new_password)
+            user.save()
+            auth.update_session_auth_hash(request, user)  # keep user logged in
+            messages.success(request, "Password changed successfully!")
+        else:
+            errors = "<br>".join([str(err) for err in form.errors.values()])
+            messages.error(request, mark_safe(f"Failed to change password<br>{errors}"))
+
+    return redirect('user-profile')

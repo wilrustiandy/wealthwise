@@ -26,9 +26,11 @@ urlpatterns = [
     url(r'^dashboard$', login_required(core_views.dashboard), name="dashboard"),
 
     # User
-    url(r'^user/login$', user_views.login, name="user-login"),
-    url(r'^user/logout$', user_views.logout, name="user-logout"),
     url(r'^user/register$', user_views.register, name="user-register"),
+    url(r'^user/login$', user_views.login, name="user-login"),
+    url(r'^user/logout$', login_required(user_views.logout), name="user-logout"),
+    url(r'^user/profile$', login_required(user_views.profile), name="user-profile"),
+    url(r'^user/edit_password$', login_required(user_views.edit_password), name="edit-password"),
 
     # Errors
     url(r'error', core_views.internal_server_error, name="internal-server-error"),

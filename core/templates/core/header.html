@@ -15,8 +15,16 @@
             </div>
           </a>
           <div class="dropdown-menu dropdown-menu-end navbar-dropdown preview-list" aria-labelledby="profileDropdown">
-            <h6 class="p-3 mb-0">Profile</h6>
-            <div class="dropdown-divider"></div>
+            <a class="dropdown-item preview-item" href="{% url 'user-profile' %}">
+              <div class="preview-thumbnail">
+                <div class="preview-icon bg-dark rounded-circle">
+                  <i class="mdi mdi-account text-success"></i>
+                </div>
+              </div>
+              <div class="preview-item-content">
+                <p class="preview-subject mb-1">Profile</p>
+              </div>
+            </a>
             <div class="dropdown-divider"></div>
             <a class="dropdown-item preview-item" id="confirmationButton" data-bs-toggle="modal" data-bs-target="#confirmationModal" data-action="logout" data-url="{% url 'user-logout' %}" data-name="">
               <div class="preview-thumbnail">
