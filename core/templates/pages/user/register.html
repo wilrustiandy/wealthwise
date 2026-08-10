@@ -7,32 +7,40 @@
 
 {% block content %}
 <h3 class="card-title text-start mb-3">Register</h3>
-<form method="POST" id="registerForm" spellcheck="false">
+<form method="POST" id="register-form" spellcheck="false">
   {% csrf_token %}
   <div class="form-group">
     <label>Full Name</label>
-    <input name="fullname" id="fullname" type="text" class="form-control p_input {% if form.fullname.errors %}is-invalid{% endif %}" required>
-    <small class="text-danger {% if not form.fullname.errors %}d-none{% endif %}" id="fullnameError">Name must start with a letter and contain only letters and spaces.</small>
+    {{ form.fullname }}
+    {% if not form.fullname.errors %}
+    <small class="text-danger d-none" id="fullname-error">Name must start with a letter and contain only letters and spaces.</small>
+    {% endif %}
   </div>
   <div class="form-group">
     <label>Username</label>
-    <input name="username" id="username" type="text" class="form-control p_input {% if form.username.errors %}is-invalid{% endif %}" required>
-    <small class="text-danger {% if not form.username.errors %}d-none{% endif %}" id="usernameError">Username must start with a letter and may contain letters, numbers, and underscores (_).</small>
+    {{ form.username }}
+    {% if not form.username.errors %}
+    <small class="text-danger d-none" id="username-error">Username must start with a letter and may contain letters, numbers, and underscores.</small>
+    {% endif %}
   </div>
   <div class="form-group">
     <label>Email</label>
-    <input name="email" id="email" type="text" class="form-control p_input {% if form.email.errors %}is-invalid{% endif %}" required>
-    <small class="text-danger {% if not form.email.errors %}d-none{% endif %}" id="emailError">Please enter a valid email (must start with a letter).</small>
+    {{ form.email }}
+    {% if not form.email.errors %}
+    <small class="text-danger d-none" id="email-error">Please enter a valid email.</small>
+    {% endif %}
   </div>
   <div class="form-group position-relative">
     <label>Password</label>
     <div class="input-group">
-        <input name="password" id="password" type="password" class="form-control p_input {% if form.password.errors %}is-invalid{% endif %}" required>
-        <button type="button" class="btn btn-outline-secondary" id="togglePassword">
-          <i class="mdi mdi-eye-off" id="toggleIcon"></i>
-        </button>
-      </div>
-    <small class="text-danger {% if not form.password.errors %}d-none{% endif %}" id="passwordError">Password must not be empty or contain spaces.</small>
+      {{ form.password }}
+      <button type="button" class="btn btn-outline-secondary toggle-password-btn">
+        <i class="mdi mdi-eye-off"></i>
+      </button>
+    </div>
+      {% if not form.password.errors %}
+    <small class="text-danger d-none" id="password-error">Password must not be empty or contain spaces.</small>
+    {% endif %}
   </div>
   <!-- TODO: Forgot password
   <div class="form-group d-flex align-items-center justify-content-end">
@@ -52,82 +60,63 @@
 </form>
 
 <script>
-function validate() {
-  const validation = [
-    {
-      "element": "username",
-      "regex": /^[A-Za-z][A-Za-z0-9_]*$/
-    },
-    {
-      "element": "fullname",
-      "regex": /^[A-Za-z][A-Za-z\s]*$/
-    },
-    {
-      "element": "email",
-      "regex": /^[A-Za-z][A-Za-z0-9._%+-]*@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/
-    },
-    {
-      "element": "password",
-      "regex": /^\S+$/
-    },
-  ];
+  function validate() {
+    const validation = [
+      {"element": "fullname", "regex": /^[A-Za-z][A-Za-z\s]*$/},
+      {"element": "username", "regex": /^[A-Za-z][A-Za-z0-9_]*$/},
+      {"element": "email", "regex": /^[A-Za-z][A-Za-z0-9._%+-]*@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/},
+      {"element": "password", "regex": /^\S+$/},
+    ];
 
-  // Validate
-  validation.forEach(field => {
-    const element = $("#" + field.element);
-    const errorElement = $("#" + field.element + "Error");
+    validation.forEach(field => {
+      const element = $("#id_" + field.element);
+      const errorElement = $("#" + field.element + "-error");
 
-    $("#"+field.element).on("input blur", function() {
-      const value = $(this).val().trim();
-      if (field.regex.test(value)) {
-        $(this).removeClass("is-invalid");
-        $("#"+field.element+"Error").addClass("d-none");
-      } else {
-        $(this).addClass("is-invalid");
-        $("#"+field.element+"Error").removeClass("d-none");
-      }
-    })
-  });
-}
-
-$(document).ready(function() {
-    // Prevent leading spaces while typing
-    $(".p_input").on("input", function() {
-        if (/^\s/.test($(this).val())) {
-            $(this).val($(this).val().trimStart());
-        }
-    });
-
-    // Force-trim password
-    $("#password").on("input", function() {
-        $(this).val($(this).val().trim());
-    });
-
-    // Toggle password show/hide
-    $("#togglePassword").on("click", function() {
-        const passwordField = $("#password");
-        const icon = $("#toggleIcon");
-
-        if (passwordField.attr("type") === "password") {
-            passwordField.attr("type", "text");
-            icon.removeClass("mdi-eye-off").addClass("mdi-eye");
+      element.on("input blur", function() {
+        const value = $(this).val().trim();
+        if (field.regex.test(value)) {
+          $(this).removeClass("is-invalid");
+          errorElement.addClass("d-none");
         } else {
-            passwordField.attr("type", "password");
-            icon.removeClass("mdi-eye").addClass("mdi-eye-off");
+          $(this).addClass("is-invalid");
+          errorElement.removeClass("d-none");
         }
+      })
+    });
+  }
+
+  $(document).ready(function() {
+    $(".p_input").on("input", function() {
+      if (/^\s/.test($(this).val())) {
+        $(this).val($(this).val().trimStart());
+      }
+    });
+
+    $("#id_password").on("input", function() {
+      $(this).val($(this).val().trim());
+    });
+
+    $(".toggle-password-btn").on("click", function() {
+      const passwordInput = $(this).closest(".input-group").find("input");
+      const icon = $(this).find("i");
+
+      const isPassword = passwordInput.attr("type") === "password";
+
+      passwordInput.attr("type", isPassword ? "text" : "password");
+      icon.toggleClass("mdi-eye-off", !isPassword).toggleClass("mdi-eye", isPassword);
     });
 
     validate();
 
-    $("#registerForm").on("submit", function(event) {
+    $("#register-form").on("submit", function(event) {
       if ($(".is-invalid").length > 0) {
-        event.preventDefault(); // stop form submission
+        event.preventDefault();
         console.warn("Form submission blocked — one or more fields are invalid.");
         return;
       }
 
       this.submit();
     });
-});  
+  });
 </script>
 {% endblock %}

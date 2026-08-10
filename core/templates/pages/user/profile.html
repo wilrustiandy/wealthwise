@@ -15,18 +15,24 @@
                 <div class="card bg-dark text-white p-4 mb-4">
                     <div class="card-body">
                         <h3 class="text-center mb-4">Edit Profile</h3>
-                        <form method="POST" action="{% url 'user-profile' %}">
+                        <form method="POST" id="update-profile" spellcheck="false">
                             {% csrf_token %}
                             <div class="form-group mb-3">
-                                <label for="fullname" class="form-label">Full Name</label>
-                                <input type="text" name="fullname" id="fullname" class="form-control p_input" value="{{ form.fullname.value }}" required>
+                                <label>Full Name</label>
+                                {{ profile_form.fullname }}
+                                {% if not profile_form.fullname.errors %}
+                                <small class="text-danger d-none" id="fullname-error">Name must start with a letter and contain only letters and spaces.</small>
+                                {% endif %}
                             </div>
                             <div class="form-group mb-3">
-                                <label for="email" class="form-label">Email</label>
-                                <input type="text" name="email" id="email" class="form-control p_input" value="{{ form.email.value }}" required>
+                                <label>Email</label>
+                                {{ profile_form.email }}
+                                {% if not profile_form.email.errors %}
+                                <small class="text-danger d-none" id="email-error">Please enter a valid email.</small>
+                                {% endif %}
                             </div>
                             <div class="d-grid mt-4">
-                                <button type="submit" class="btn btn-info btn-block">
+                                <button type="submit" name="update_profile" class="btn btn-info btn-block">
                                     <i class="mdi mdi-account-edit me-2"></i> Update Profile
                                 </button>
                             </div>
@@ -38,35 +44,152 @@
                 <div class="card bg-dark text-white p-4">
                     <div class="card-body">
                         <h3 class="text-center mb-4">Change Password</h3>
-                        <form method="POST" action="{% url 'edit-password' %}">
+                        <form method="POST" id="edit-password" spellcheck="false">
                             {% csrf_token %}
 
                             <div class="form-group mb-3">
-                                <label for="old_password" class="form-label">Old Password</label>
-                                <input type="password" name="old_password" id="old_password" class="form-control p_input" placeholder="Enter old password" required>
+                                <label>Old Password</label>
+                                <div class="input-group">
+                                    {{ password_form.old_password }}
+                                    <button type="button" class="btn btn-outline-secondary toggle-password-btn">
+                                        <i class="mdi mdi-eye-off"></i>
+                                    </button>
+                                </div>
+                                {% if not password_form.old_password.errors %}
+                                <small class="text-danger d-none" id="old_password-error">Password must not be empty or contain spaces.</small>
+                                {% endif %}
                             </div>
 
                             <div class="form-group mb-3">
-                                <label for="new_password" class="form-label">New Password</label>
-                                <input type="password" name="new_password" id="new_password" class="form-control p_input" placeholder="Enter new password" required>
+                                <label>New Password</label>
+                                <div class="input-group">
+                                    {{ password_form.new_password }}
+                                    <button type="button" class="btn btn-outline-secondary toggle-password-btn">
+                                        <i class="mdi mdi-eye-off"></i>
+                                    </button>
+                                </div>
+                                {% if not password_form.new_password.errors %}
+                                <small class="text-danger d-none" id="new_password-error">Password must not be empty or contain spaces.</small>
+                                {% endif %}
                             </div>
 
                             <div class="form-group mb-3">
-                                <label for="confirm_password" class="form-label">Confirm Password</label>
-                                <input type="password" name="confirm_password" id="confirm_password" class="form-control p_input" placeholder="Confirm new password" required>
+                                <label>Confirm Password</label>
+                                <div class="input-group">
+                                    {{ password_form.confirm_password }}
+                                    <button type="button" class="btn btn-outline-secondary toggle-password-btn">
+                                        <i class="mdi mdi-eye-off"></i>
+                                    </button>
+                                </div>
+                                {% if not password_form.confirm_password.errors %}
+                                <small class="text-danger d-none" id="confirm_password-error">Password must not be empty or contain spaces.</small>
+                                {% endif %}
                             </div>
 
                             <div class="d-grid mt-4">
-                                <button type="submit" class="btn btn-success btn-block">
+                                <button type="submit" name="edit_password" class="btn btn-success btn-block">
                                     <i class="mdi mdi-lock-reset me-2"></i> Change Password
                                 </button>
                             </div>
                         </form>
                     </div>
                 </div>
-
             </div>
         </div>
     </div>
 </div>
+
+<script>
+    function validate_profile() {
+      const validation = [
+        {"element": "fullname", "regex": /^[A-Za-z][A-Za-z\s]*$/},
+        {"element": "email", "regex": /^[A-Za-z][A-Za-z0-9._%+-]*@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/},
+      ];
+  
+      validation.forEach(field => {
+        const element = $("#id_" + field.element);
+        const errorElement = $("#" + field.element + "-error");
+  
+        element.on("input blur", function() {
+          const value = $(this).val().trim();
+          if (field.regex.test(value)) {
+            $(this).removeClass("is-profile-invalid");
+            errorElement.addClass("d-none");
+          } else {
+            $(this).addClass("is-profile-invalid");
+            errorElement.removeClass("d-none");
+          }
+        })
+      });
+    }
+
+    function validate_password() {
+        const validation = [
+            {"element": "old_password", "regex": /^\S+$/},
+            {"element": "new_password", "regex": /^\S+$/},
+            {"element": "confirm_password", "regex": /^\S+$/},
+        ];
+    
+        validation.forEach(field => {
+          const element = $("#id_" + field.element);
+          const errorElement = $("#" + field.element + "-error");
+    
+          element.on("input blur", function() {
+            const value = $(this).val().trim();
+            if (field.regex.test(value)) {
+              $(this).removeClass("is-password-invalid");
+              errorElement.addClass("d-none");
+            } else {
+              $(this).addClass("is-password-invalid");
+              errorElement.removeClass("d-none");
+            }
+          })
+        });
+      }
+  
+    $(document).ready(function() {
+        $(".p_input").on("input", function() {
+            if (/^\s/.test($(this).val())) {
+                $(this).val($(this).val().trimStart());
+            }
+        });
+
+        $("#id_old_password, #id_new_password, #id_confirm_password").on("input", function() {
+            $(this).val($(this).val().trim());
+        });
+      
+        $(".toggle-password-btn").on("click", function() {
+            const passwordInput = $(this).closest(".input-group").find("input");
+            const icon = $(this).find("i");
+
+            const isPassword = passwordInput.attr("type") === "password";
+
+            passwordInput.attr("type", isPassword ? "text" : "password");
+            icon.toggleClass("mdi-eye-off", !isPassword).toggleClass("mdi-eye", isPassword);
+          });
+
+        validate_profile();
+        validate_password();
+  
+        $("#user-profile").on("submit", function(event) {
+            if ($(".is-profile-invalid").length > 0) {
+                event.preventDefault();
+                console.warn("Form submission blocked — one or more fields are invalid.");
+                return;
+            }
+    
+            this.submit();
+        });
+
+        $("#edit-password").on("submit", function(event) {
+            if ($(".is-password-invalid").length > 0) {
+                event.preventDefault();
+                console.warn("Form submission blocked — one or more fields are invalid.");
+                return;
+            }
+    
+            this.submit();
+        });
+    });
+  </script>
 {% endblock %}

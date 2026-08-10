@@ -2,36 +2,49 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.models import User
 from django.db import IntegrityError, transaction
 from django.utils.safestring import mark_safe
+
 import django.contrib.auth as auth
 import django.contrib.messages as messages
 
-from user.forms import UserForm, EditProfileForm, EditFullNameForm, EditPasswordForm
+from user.forms import UserLoginForm, UserRegistrationForm, EditProfileForm, EditPasswordForm
 from core.utils import get_form_errors
 
 # Create your views here.
 def login(request):
+    form = UserLoginForm(request.POST or None)
+
     if request.method == "POST":
-        username_or_email = request.POST['usernameOrEmail']
-        password = request.POST['password']
+        if form.is_valid():
+            print(form.cleaned_data)
+            username_or_email = form.cleaned_data.get('username_email')
+            password = form.cleaned_data.get('password')
+            
+            try:
+                user_obj = User.objects.get(email=username_or_email)
+                username = user_obj.username
+            
+            except User.DoesNotExist:
+                username = username_or_email
+
+            user = auth.authenticate(request, username=username, password=password)
+
+            if user:
+                auth.login(request, user)
+                messages.success(request, "Login successful!")
+                return redirect('dashboard')
+            
+            else:
+                messages.error(request, "Login failed! Wrong username or password")
         
-        # Try to get user by email
-        try:
-            user_obj = User.objects.get(email=username_or_email)
-            username = user_obj.username
-        except User.DoesNotExist:
-            username = username_or_email  # Assume they entered username
-
-        # Authenticate using username
-        user = auth.authenticate(request, username=username, password=password)
-
-        if user:
-            auth.login(request, user)
-            messages.success(request, "Login successful!")
-            return redirect('dashboard')
         else:
-            messages.error(request, "Login failed! Wrong username or password")
-
-    return render(request, 'pages/user/login.html')
+            error = get_form_errors(form.errors)
+            print("Form error: " + error)
+            messages.error(request, mark_safe(f"Login failed!!<br>{error}"))
+    
+    data = {
+        'form': form
+    }
+    return render(request, 'pages/user/login.html', data)
 
 def logout(request):
     auth.logout(request)
@@ -39,19 +52,13 @@ def logout(request):
     return redirect('user-login')
 
 def register(request):
-    form = UserForm()
+    form = UserRegistrationForm(request.POST or None)
 
     if request.method == "POST":
         with transaction.atomic():
             try:
-                form = UserForm(request.POST)
                 if form.is_valid():
-                    user = User.objects.create_user(
-                        username=form.cleaned_data['username'],
-                        email=form.cleaned_data['email'],
-                        password=form.cleaned_data['password'],
-                        first_name=form.cleaned_data['fullname']
-                    )
+                    user = form.save()
 
                     auth.login(request, user)
                     messages.success(request, "Registration successful!")
@@ -73,56 +80,49 @@ def register(request):
     return render(request, 'pages/user/register.html', data)
 
 def profile(request):
-    form = EditProfileForm(request.POST or None, instance=request.user)
+    profile_form = EditProfileForm(instance=request.user)
+    password_form = EditPasswordForm(user=request.user)
 
     if request.method == "POST":
-        with transaction.atomic():
-            try:
-                if form.is_valid():
-                    form.save()
-                    messages.success(request, "Profile updated successfully!")
+        if 'update_profile' in request.POST:
+            with transaction.atomic():
+                try:
+                    profile_form = EditProfileForm(request.POST, instance=request.user)
+                    if profile_form.is_valid():
+                        profile_form.save()
+                        messages.success(request, "Profile updated successfully!")
+                        # return redirect('user-profile')
+                    
+                    else:
+                        error = get_form_errors(profile_form.errors)
+                        print("Form error: " + error)
+                        messages.error(request, mark_safe(f"Update profile failed!!<br>{error}"))
                 
-                else:
-                    error = get_form_errors(form.errors)
-                    print("Form error: " + error)
-                    messages.error(request, mark_safe(f"Update profile failed!!<br>{error}"))
-            
-            except IntegrityError as error:
-                print("Integrity error: ", error)
-                messages.error(request, mark_safe(f"Update profile failed!!<br>{str(error)}"))
-                return redirect('internal-server-error', error)
+                except IntegrityError as error:
+                    print("Integrity error: ", error)
+                    messages.error(request, mark_safe(f"Update profile failed!!<br>{str(error)}"))
+                    return redirect('internal-server-error', error)
+        
+        elif 'edit_password' in request.POST:
+            with transaction.atomic():
+                try:
+                    password_form = EditPasswordForm(request.POST, user=request.user)
+                    if password_form.is_valid():
+                        password_form.save(request=request)
+                        messages.success(request, "Password changed successfully!")
+                        # return redirect('user-profile')
+                    
+                    else:
+                        errors = "<br>".join([str(err) for err in password_form.errors.values()])
+                        messages.error(request, mark_safe(f"Failed to change password<br>{errors}"))
+                
+                except IntegrityError as error:
+                    print("Integrity error: ", error)
+                    messages.error(request, mark_safe(f"Change password failed!!<br>{str(error)}"))
+                    return redirect('internal-server-error', error)
     
     data = {
-        'form': form
+        'profile_form': profile_form,
+        'password_form': password_form
     }
     return render(request, 'pages/user/profile.html', data)
-
-def edit_fullname(request):
-    if request.method == "POST":
-        form = EditFullNameForm(request.POST)
-        if form.is_valid():
-            fullname = form.cleaned_data['fullname']
-            request.user.first_name = fullname  # or split into first_name/last_name if needed
-            request.user.save()
-            messages.success(request, "Full name updated successfully!")
-        else:
-            errors = "<br>".join([str(err) for err in form.errors.values()])
-            messages.error(request, mark_safe(f"Failed to update full name<br>{errors}"))
-
-    return redirect('settings')
-
-def edit_password(request):
-    if request.method == "POST":
-        form = EditPasswordForm(request.POST, user=request.user)
-        if form.is_valid():
-            new_password = form.cleaned_data['new_password']
-            user = request.user
-            user.set_password(new_password)
-            user.save()
-            auth.update_session_auth_hash(request, user)  # keep user logged in
-            messages.success(request, "Password changed successfully!")
-        else:
-            errors = "<br>".join([str(err) for err in form.errors.values()])
-            messages.error(request, mark_safe(f"Failed to change password<br>{errors}"))
-
-    return redirect('user-profile')
